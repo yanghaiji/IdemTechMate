@@ -7,11 +7,13 @@
     <groupId>com.javayh.idempotent.framework</groupId>
     <artifactId>idem.tech.mate.boot.starter</artifactId>
     <version>1.0.0</version>
+    <packaging>jar</packaging>
 
 
     <properties>
         <spring-boot.version>2.6.2</spring-boot.version>
         <fastjson.version>1.2.83</fastjson.version>
+        <redisson.version>3.16.6</redisson.version>
     </properties>
 
     <dependencies>
@@ -59,9 +61,18 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <artifactId>spring-boot-actuator</artifactId>
         </dependency>
 
+        <!--  <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-starter-data-redis</artifactId>
+          </dependency>
+          <dependency>
+              <groupId>org.redisson</groupId>
+              <artifactId>redisson-spring-boot-starter</artifactId>
+              <version>${redisson.version}</version>
+          </dependency>-->
     </dependencies>
 
     <dependencyManagement>

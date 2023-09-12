@@ -1,0 +1,4 @@
+### id 测试接口此接口为内置endpoint
+# 返回的示例 Idem 28639a95-0c10-468f-8126-ee2f59960612
+GET http://localhost:8088/idem/idem/key
+
