@@ -1,7 +1,10 @@
 package com.javayh.idempotent.framework.configuration;
 
+import com.javayh.idempotent.framework.core.interceptor.IdempotentInterceptor;
 import com.javayh.idempotent.framework.provider.endoint.IdemTechMateEndpoint;
-import com.javayh.idempotent.framework.provider.support.UidGenerateSupport;
+import com.javayh.idempotent.framework.provider.support.DefaultAbstractKeyGenerate;
+import com.javayh.idempotent.framework.provider.support.DefaultAbstractIdemBucket;
+import com.javayh.idempotent.framework.provider.support.DefaultAbstractUserInfoContent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -21,6 +24,8 @@ import java.lang.annotation.*;
 @Inherited
 @Documented
 @Configuration
-@Import({UidGenerateSupport.class, IdemTechMateEndpoint.class})
+@Import({DefaultAbstractKeyGenerate.class, IdemTechMateEndpoint.class,
+        WebIdemTechMateConfiguration.class, IdempotentInterceptor.class,
+        DefaultAbstractIdemBucket.class, DefaultAbstractUserInfoContent.class})
 public @interface IdemTechMateAutoConfiguration {
 }

@@ -2,3 +2,8 @@
 # 返回的示例 Idem 28639a95-0c10-468f-8126-ee2f59960612
 GET http://localhost:8088/idem/idem/key
 
+
+### 功能测试
+### 用于测试接口幂等性
+GET http://localhost:8088/idem/test/query
+Idem: idem 139194b1-b324-4730-8983-8cf269b90703

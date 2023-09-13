@@ -1,4 +1,4 @@
-package com.javayh.idempotent.framework.provider.core;
+package com.javayh.idempotent.framework.core;
 
 /**
  * <p>
@@ -9,7 +9,7 @@ package com.javayh.idempotent.framework.provider.core;
  * @version 1.0.0
  * @since 2023-09-11
  */
-public interface AbstractIdGenerate {
+public interface AbstractKeyGenerate {
 
     /**
      * 生成 id
@@ -21,5 +21,5 @@ public interface AbstractIdGenerate {
      * <p>
      * 格式 idem:28639a95-0c10-468f-8126-ee2f59960612
      */
-    String generateId(String prefix);
+    String generateKey(String prefix);
 }

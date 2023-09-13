@@ -1,4 +1,4 @@
-package com.javayh.idempotent.framework.provider.core;
+package com.javayh.idempotent.framework.core;
 
 /**
  * <p>
@@ -11,6 +11,13 @@ package com.javayh.idempotent.framework.provider.core;
  */
 public interface AbstractIdemBucket {
 
+    /**
+     * 判断是否存在缓存数据
+     *
+     * @param key 唯一标识
+     * @return 返回true标识存在，注解返回错误
+     */
+    boolean isEmpty(String key);
 
     /**
      * 将数据存储到桶内
@@ -28,10 +35,18 @@ public interface AbstractIdemBucket {
     void delBucket(String key);
 
     /**
+     * 给指定的key设置过期时间
+     *
+     * @param key    唯一标识
+     * @param expire 过期时间
+     */
+    void expire(String key, int expire);
+
+    /**
      * 进行key 的拼接
      *
      * @param key 唯一标识
-     * @return 将通过 {@link AbstractIdGenerate#generateId(String)} 生成的key 转换成符合k.v 存储的规范
+     * @return 将通过 {@link AbstractKeyGenerate#generateKey(String)} 生成的key 转换成符合k.v 存储的规范
      */
     default String convertKey(String key) {
         return key.replaceAll(" ", ":");

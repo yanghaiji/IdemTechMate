@@ -1,6 +1,6 @@
 package com.javayh.idempotent.framework.provider.endoint;
 
-import com.javayh.idempotent.framework.provider.support.UidGenerateSupport;
+import com.javayh.idempotent.framework.provider.support.DefaultAbstractKeyGenerate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class IdemTechMateEndpoint {
 
-    private final UidGenerateSupport generateSupport;
+    private final DefaultAbstractKeyGenerate generateSupport;
 
-    public IdemTechMateEndpoint(UidGenerateSupport generateSupport) {
+    public IdemTechMateEndpoint(DefaultAbstractKeyGenerate generateSupport) {
         this.generateSupport = generateSupport;
     }
 
@@ -27,7 +27,7 @@ public class IdemTechMateEndpoint {
      */
     @GetMapping(value = "idem/key")
     public String gen(String prefix) {
-        return generateSupport.generateId(prefix);
+        return generateSupport.generateKey(prefix);
     }
 
 }
