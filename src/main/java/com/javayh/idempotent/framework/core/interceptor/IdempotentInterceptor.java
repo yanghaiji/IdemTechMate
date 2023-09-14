@@ -74,6 +74,11 @@ public class IdempotentInterceptor implements HandlerInterceptor {
     }
 
 
+    /**
+     * 幂等与限流的处理逻辑
+     * <p>
+     * 限流在前，幂等在后
+     */
     private Boolean getPreHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
@@ -83,35 +88,43 @@ public class IdempotentInterceptor implements HandlerInterceptor {
                 int expire = idempotent.expire();
                 String token = request.getHeader("Idem");
                 String convertKey = idemBucket.convertKey(token);
+                String uri = request.getRequestURI();
                 IdemTechValue idemTechValue = IdemTechValue.builder()
                         .user(userInfoContent.getUser()).time(System.currentTimeMillis())
-                        .key(convertKey).url(request.getRequestURI()).expireTime(expire).build();
-                if (!idemBucket.isEmpty(convertKey)) {
-                    // 放入缓存
-                    idemBucket.putBucket(convertKey, idemTechValue);
-                    // 设置过期时间
-                    idemBucket.expire(convertKey, expire);
-                    log.info("访问系统的日志 {}", idemTechValue.toString());
-                    return true;
-                } else {
-                    log.info("访问系统的被幂等后的日志 {}", idemTechValue.toString());
-                    response.setStatus(HttpServletResponse.SC_CONFLICT);
-                    // 设置响应的内容类型为 JSON
-                    response.setContentType("application/json;charset=UTF-8");
-                    // 构建要返回的 JSON 消息
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("code", HttpServletResponse.SC_CONFLICT);
-                    jsonObject.put("msg", "执行成功");
-                    // 获取响应输出流并将 JSON 写入其中
-                    response.getWriter().write(jsonObject.toJSONString());
-                    // 不要忘记关闭输出流
-                    response.getWriter().flush();
-                    response.getWriter().close();
-                    return false;
-                }
+                        .key(convertKey).url(uri).expireTime(expire).build();
+                return idempotent(response, expire, convertKey, idemTechValue);
             }
         }
         return true;
+    }
+
+    /**
+     * 幂等处理方法
+     */
+    private Boolean idempotent(HttpServletResponse response, int expire, String convertKey, IdemTechValue idemTechValue) throws IOException {
+        if (!idemBucket.isEmpty(convertKey)) {
+            // 放入缓存
+            idemBucket.putBucket(convertKey, idemTechValue);
+            // 设置过期时间
+            idemBucket.expire(convertKey, expire);
+            log.info("访问系统的日志 {}", idemTechValue.toString());
+            return true;
+        } else {
+            log.info("访问系统的被幂等后的日志 {}", idemTechValue.toString());
+            response.setStatus(HttpServletResponse.SC_CONFLICT);
+            // 设置响应的内容类型为 JSON
+            response.setContentType("application/json;charset=UTF-8");
+            // 构建要返回的 JSON 消息
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("code", HttpServletResponse.SC_CONFLICT);
+            jsonObject.put("msg", "执行成功");
+            // 获取响应输出流并将 JSON 写入其中
+            response.getWriter().write(jsonObject.toJSONString());
+            // 不要忘记关闭输出流
+            response.getWriter().flush();
+            response.getWriter().close();
+            return false;
+        }
     }
 
 }

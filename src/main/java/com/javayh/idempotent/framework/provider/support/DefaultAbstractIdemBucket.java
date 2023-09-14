@@ -1,9 +1,10 @@
 package com.javayh.idempotent.framework.provider.support;
 
 import com.javayh.idempotent.framework.core.AbstractIdemBucket;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -16,7 +17,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultAbstractIdemBucket implements AbstractIdemBucket {
 
-    Map<String, Object> cache = new ConcurrentHashMap<>();
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    public DefaultAbstractIdemBucket(RedisTemplate<String, Object> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     /**
      * 判断是否存在缓存数据
@@ -26,7 +31,10 @@ public class DefaultAbstractIdemBucket implements AbstractIdemBucket {
      */
     @Override
     public boolean isEmpty(String key) {
-        return cache.containsKey(key);
+        if (StringUtils.isEmpty(key)) {
+            return false;
+        }
+        return redisTemplate.hasKey(key);
     }
 
     /**
@@ -37,7 +45,7 @@ public class DefaultAbstractIdemBucket implements AbstractIdemBucket {
      */
     @Override
     public void putBucket(String key, Object value) {
-        cache.put(key, value);
+        redisTemplate.opsForValue().set(key, value);
     }
 
     /**
@@ -47,18 +55,20 @@ public class DefaultAbstractIdemBucket implements AbstractIdemBucket {
      */
     @Override
     public void delBucket(String key) {
-        cache.remove(key);
+        redisTemplate.delete(key);
     }
 
     /**
      * 给指定的key设置过期时间
      *
      * @param key    唯一标识
-     * @param expire 过期时间
+     * @param expire 过期时间 秒为单位
      */
     @Override
     public void expire(String key, int expire) {
-
+        if (expire > 0) {
+            redisTemplate.expire(key, expire, TimeUnit.SECONDS);
+        }
     }
 
 }
