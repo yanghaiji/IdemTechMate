@@ -20,9 +20,9 @@ import java.util.concurrent.TimeUnit;
 public @interface Idempotent {
 
     /**
-     * 默认key不过期 单位为{@link TimeUnit#SECONDS}
+     * 默认key 10s 过期，单位为{@link TimeUnit#SECONDS}
      * <p>
      */
-    int expire() default -1;
+    int expire() default 10;
 
 }
