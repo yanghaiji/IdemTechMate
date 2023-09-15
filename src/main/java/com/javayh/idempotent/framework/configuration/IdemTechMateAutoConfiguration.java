@@ -5,6 +5,7 @@ import com.javayh.idempotent.framework.core.properties.RateLimiterProperties;
 import com.javayh.idempotent.framework.provider.endoint.IdemTechMateEndpoint;
 import com.javayh.idempotent.framework.provider.support.DefaultAbstractIdemBucket;
 import com.javayh.idempotent.framework.provider.support.DefaultAbstractKeyGenerate;
+import com.javayh.idempotent.framework.provider.support.DefaultAbstractRateLimiter;
 import com.javayh.idempotent.framework.provider.support.DefaultAbstractUserInfoContent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -28,6 +29,6 @@ import java.lang.annotation.*;
 @Import({DefaultAbstractKeyGenerate.class, IdemTechMateEndpoint.class,
         WebIdemTechMateConfiguration.class, IdempotentInterceptor.class,
         DefaultAbstractIdemBucket.class, DefaultAbstractUserInfoContent.class,
-        RedisConfiguration.class, RateLimiterProperties.class})
+        RedisConfiguration.class, RateLimiterProperties.class, DefaultAbstractRateLimiter.class})
 public @interface IdemTechMateAutoConfiguration {
 }

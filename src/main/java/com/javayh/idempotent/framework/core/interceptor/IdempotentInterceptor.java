@@ -5,6 +5,7 @@ import com.javayh.idempotent.framework.IdemTechValue;
 import com.javayh.idempotent.framework.annotation.Idempotent;
 import com.javayh.idempotent.framework.core.AbstractIdemBucket;
 import com.javayh.idempotent.framework.core.AbstractUserInfoContent;
+import com.javayh.idempotent.framework.core.properties.RateLimiterProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -14,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -37,11 +40,15 @@ public class IdempotentInterceptor implements HandlerInterceptor {
 
     private final AbstractIdemBucket idemBucket;
     private final AbstractUserInfoContent userInfoContent;
+    private final RateLimiterProperties rateLimiterProperties;
+
 
     public IdempotentInterceptor(AbstractIdemBucket idemBucket,
-                                 AbstractUserInfoContent userInfoContent) {
+                                 AbstractUserInfoContent userInfoContent,
+                                 RateLimiterProperties rateLimiterProperties) {
         this.idemBucket = idemBucket;
         this.userInfoContent = userInfoContent;
+        this.rateLimiterProperties = rateLimiterProperties;
     }
 
     /**
@@ -92,6 +99,13 @@ public class IdempotentInterceptor implements HandlerInterceptor {
                 IdemTechValue idemTechValue = IdemTechValue.builder()
                         .user(userInfoContent.getUser()).time(System.currentTimeMillis())
                         .key(convertKey).url(uri).expireTime(expire).build();
+                Map<String, RateLimiterProperties.Limiter> uriConfig = rateLimiterProperties.getUriConfig();
+                Optional<RateLimiterProperties.Limiter> countLimitUri = uriConfig.values().stream().filter(o -> o.getBucketKey().contains(uri)).distinct().findFirst();
+                if (countLimitUri.isPresent()) {
+                    RateLimiterProperties.Limiter limiter = countLimitUri.get();
+                    Integer limitDuration = limiter.getLimitDuration();
+                    Long qps = limiter.getQps();
+                }
                 return idempotent(response, expire, convertKey, idemTechValue);
             }
         }
