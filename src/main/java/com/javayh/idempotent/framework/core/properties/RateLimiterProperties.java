@@ -29,12 +29,6 @@ public class RateLimiterProperties {
     private Boolean showLog = false;
 
     /**
-     * 全绝的配置
-     */
-    @Deprecated
-    private Limiter global;
-
-    /**
      * 单个接口的限流，高于全局的配置
      */
     private Map<String, Limiter> uriConfig;
