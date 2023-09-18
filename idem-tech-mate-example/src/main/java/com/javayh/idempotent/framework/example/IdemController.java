@@ -41,8 +41,8 @@ public class IdemController {
         properties.getUriConfig().forEach((k,v)->{
             log.info(k,v);
             List<String> bucketKey = v.getBucketKey();
-            log.info("在 {},中 Qps配置为 {}",k,v.getQps());
-            log.info("在 {},中 LimitDuration {}",k,v.getLimitDuration());
+            log.info("在 {},中 Count配置为 {}",k,v.getCount());
+            log.info("在 {},中 RequestDuration配置为 {}",k,v.getRequestDuration());
             log.info("在 {},中 BucketKey配置为 {}",k, Arrays.toString(bucketKey.toArray()));
         });
         log.info("数据处理...");

@@ -41,8 +41,17 @@ public class RateLimiterProperties {
 
         /**
          * 最大的qps数据
+         * <p>
+         * maxQps = {@link RateLimiterProperties#getUriConfig()#getCount()} / {@link RateLimiterProperties#getUriConfig()#getRequestDuration()}
          */
-        private Long qps;
+        private Long count;
+
+        /**
+         * 请求的持续时间，默认 1s
+         * <p>
+         * 用来计算最终的qps数据量
+         */
+        private Integer requestDuration = 1;
 
         /**
          * 被限流的时常，单位为秒，默认时10s
