@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.javayh.idempotent.framework.IdemTechValue;
 import com.javayh.idempotent.framework.annotation.Idempotent;
 import com.javayh.idempotent.framework.core.AbstractIdemBucket;
+import com.javayh.idempotent.framework.core.AbstractRateLimiter;
 import com.javayh.idempotent.framework.core.AbstractUserInfoContent;
 import com.javayh.idempotent.framework.core.properties.RateLimiterProperties;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Optional;
 
 
 /**
@@ -41,14 +40,17 @@ public class IdempotentInterceptor implements HandlerInterceptor {
     private final AbstractIdemBucket idemBucket;
     private final AbstractUserInfoContent userInfoContent;
     private final RateLimiterProperties rateLimiterProperties;
+    private final AbstractRateLimiter abstractRateLimiter;
 
 
     public IdempotentInterceptor(AbstractIdemBucket idemBucket,
                                  AbstractUserInfoContent userInfoContent,
-                                 RateLimiterProperties rateLimiterProperties) {
+                                 RateLimiterProperties rateLimiterProperties,
+                                 AbstractRateLimiter abstractRateLimiter) {
         this.idemBucket = idemBucket;
         this.userInfoContent = userInfoContent;
         this.rateLimiterProperties = rateLimiterProperties;
+        this.abstractRateLimiter = abstractRateLimiter;
     }
 
     /**
@@ -99,17 +101,30 @@ public class IdempotentInterceptor implements HandlerInterceptor {
                 IdemTechValue idemTechValue = IdemTechValue.builder()
                         .user(userInfoContent.getUser()).time(System.currentTimeMillis())
                         .key(convertKey).url(uri).expireTime(expire).build();
-                Map<String, RateLimiterProperties.Limiter> uriConfig = rateLimiterProperties.getUriConfig();
-                Optional<RateLimiterProperties.Limiter> countLimitUri = uriConfig.values().stream().filter(o -> o.getBucketKey().contains(uri)).distinct().findFirst();
-                if (countLimitUri.isPresent()) {
-                    RateLimiterProperties.Limiter limiter = countLimitUri.get();
-                    Integer limitDuration = limiter.getLimitDuration();
-                    Long qps = limiter.getQps();
+                if (abstractRateLimiter.allowRequest(uri)) {
+                    return isRateLimited(response, idemTechValue);
                 }
                 return idempotent(response, expire, convertKey, idemTechValue);
             }
         }
         return true;
+    }
+
+    private Boolean isRateLimited(HttpServletResponse response, IdemTechValue idemTechValue) throws IOException {
+        log.info("访问系统的限流等后的日志 {}", idemTechValue.toString());
+        response.setStatus(429);
+        // 设置响应的内容类型为 JSON
+        response.setContentType("application/json;charset=UTF-8");
+        // 构建要返回的 JSON 消息
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("code", 429);
+        jsonObject.put("msg", "服务器繁忙，请稍后再试");
+        // 获取响应输出流并将 JSON 写入其中
+        response.getWriter().write(jsonObject.toJSONString());
+        // 不要忘记关闭输出流
+        response.getWriter().flush();
+        response.getWriter().close();
+        return false;
     }
 
     /**

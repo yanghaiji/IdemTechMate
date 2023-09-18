@@ -4,6 +4,8 @@ server:
     context-path: /idem/api/
 
 spring:
+  application:
+    name: idem-tech-mate-example
   redis:
     host: localhost
     port: 6379
@@ -23,7 +25,8 @@ idem:
   limiter:
     uri-config:
       test:
-        qps: 10
+        count: 10
+        requestDuration: 1
         limitDuration: 10
         bucketKey:
           - /idem/api/test/query
